@@ -12,9 +12,9 @@ form.addEventListener('submit', (e) => {
   e.preventDefault()
   const text = input.value.trim()
   if (!text) return
-  addTodo(text)
+  const newId = addTodo(text)
   input.value = ''
-  renderTodoList(listEl)
+  renderTodoList(listEl, newId ? { animateId: newId } : undefined)
 })
 
 /* When a checkbox changes (toggle): find the todo by id and flip its completed state, then re-render. */

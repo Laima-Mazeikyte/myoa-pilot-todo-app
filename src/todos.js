@@ -3,15 +3,18 @@ let todos = [];
 
 /**
  * Adds a new todo. Trims text and skips if empty; creates an item with a UUID and completed: false.
+ * Returns the new todo's id, or undefined if nothing was added.
  */
 export function addTodo(text) {
   const trimmed = text.trim();
   if (!trimmed) return;
+  const id = crypto.randomUUID();
   todos.push({
-    id: crypto.randomUUID(),
+    id,
     text: trimmed,
     completed: false,
   });
+  return id;
 }
 
 /**
@@ -34,8 +37,9 @@ export function removeTodo(id) {
 /**
  * Renders the full todo list into the given container. Clears it first, then builds one <li> per todo
  * with checkbox, text (escaped), and delete button; adds --completed class when todo is done.
+ * If options.animateId is set, runs a drop-in animation from the input position for that item.
  */
-export function renderTodoList(container) {
+export function renderTodoList(container, options) {
   if (!container) return;
   container.innerHTML = '';
   for (const todo of todos) {
@@ -51,6 +55,46 @@ export function renderTodoList(container) {
     `;
     container.appendChild(li);
   }
+  const animateId = options?.animateId;
+  if (animateId) {
+    runDropInAnimation(container, animateId);
+  }
+}
+
+/**
+ * Animates the list item with the given id from the input field position into place.
+ */
+function runDropInAnimation(container, animateId) {
+  const li = container.querySelector(`[data-id="${animateId}"]`);
+  const inputEl = document.getElementById('todo-input');
+  if (!li || !inputEl) return;
+  const inputRect = inputEl.getBoundingClientRect();
+  const liRect = li.getBoundingClientRect();
+  const dx = inputRect.left - liRect.left;
+  const dy = inputRect.top - liRect.top;
+  // Set initial position WITHOUT the transition class so the browser commits this state
+  // (with the class, the transition would run from identity to here and computed stays identity).
+  li.style.transform = `translate(${dx}px, ${dy}px)`;
+  li.style.opacity = '0.7';
+  void li.offsetHeight;
+  li.classList.add('todo-item--drop-in');
+  const cleanup = () => {
+    li.classList.remove('todo-item--drop-in');
+    li.style.transform = '';
+    li.style.opacity = '';
+    li.removeEventListener('transitionend', onEnd);
+  };
+  const onEnd = (e) => {
+    if (e.target === li && e.propertyName === 'transform') {
+      cleanup();
+    }
+  };
+  li.addEventListener('transitionend', onEnd);
+  requestAnimationFrame(() => {
+    if (!li.isConnected) return;
+    li.style.transform = 'translate(0, 0)';
+    li.style.opacity = '1';
+  });
 }
 
 /** Escapes a string so it can be safely used in innerHTML (avoids XSS). */
