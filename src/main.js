@@ -204,11 +204,11 @@ async function handleSignIn(email, password, anonymousUserId) {
 }
 
 authForm.addEventListener('submit', async (e) => {
-  e.preventDefault()
+  if (typeof e.preventDefault === 'function') e.preventDefault()
   const email = authEmail.value.trim()
   const password = authPassword.value
   if (!email) return
-  setAuthMessage('')
+  setAuthMessage('');
   // #region agent log
   (() => { const p = { sessionId: '1c16a5', location: 'main.js:authForm:submit', message: 'Auth form submit', data: { mode: authModalMode }, timestamp: Date.now(), hypothesisId: 'H1' }; fetch('http://127.0.0.1:7271/ingest/55f96f24-6b1a-4af4-a5ca-eb0161c6e637', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '1c16a5' }, body: JSON.stringify(p) }).catch(() => {}); console.debug('[auth]', 'authForm:submit', p.data); })();
   // #endregion
@@ -220,7 +220,7 @@ authForm.addEventListener('submit', async (e) => {
       return
     }
     const user = await getCurrentUser()
-    const anonymousUserId = user && isAnonymous(user) ? user.id : null
+    const anonymousUserId = user && isAnonymous(user) ? user.id : null;
     // #region agent log
     (() => { const p = { sessionId: '1c16a5', location: 'main.js:authForm:submit:signin', message: 'Sign in branch', data: { isAnonymous: !!user && isAnonymous(user), anonymousUserId: anonymousUserId || null }, timestamp: Date.now(), hypothesisId: 'H3' }; fetch('http://127.0.0.1:7271/ingest/55f96f24-6b1a-4af4-a5ca-eb0161c6e637', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '1c16a5' }, body: JSON.stringify(p) }).catch(() => {}); console.debug('[auth]', 'authForm:signin branch', p.data); })();
     // #endregion
@@ -233,7 +233,7 @@ authModalBackdrop.addEventListener('click', closeAuthModal)
 
 /* On form submit: insert todo into Supabase, clear input, then refresh the list. */
 form.addEventListener('submit', async (e) => {
-  e.preventDefault()
+  if (typeof e.preventDefault === 'function') e.preventDefault()
   const text = input.value.trim()
   if (!text) return
   if (!supabase) {
@@ -314,6 +314,14 @@ async function loadAndRenderTodos(animateId) {
     .order('created_at', { ascending: true })
   if (error) {
     console.error('Failed to load todos:', error)
+    return
+  }
+  if (typeof setTodosFromDb !== 'function') {
+    console.error('setTodosFromDb is not a function', typeof setTodosFromDb)
+    return
+  }
+  if (typeof renderTodoList !== 'function') {
+    console.error('renderTodoList is not a function', typeof renderTodoList)
     return
   }
   setTodosFromDb(data ?? [])
