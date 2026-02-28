@@ -18,13 +18,13 @@ form.addEventListener('submit', async (e) => {
     return
   }
   input.value = ''
-  const { error } = await supabase.from('todos').insert({ text, is_complete: false })
+  const { data, error } = await supabase.from('todos').insert({ text, is_complete: false }).select('id').single()
   if (error) {
     console.error('Failed to insert todo:', error)
     input.value = text
     return
   }
-  await loadAndRenderTodos()
+  await loadAndRenderTodos(data?.id)
 })
 
 /* When a checkbox changes (toggle): update is_complete in Supabase by id, then refresh the display. */
@@ -63,7 +63,7 @@ listEl.addEventListener('click', async (e) => {
 })
 
 /* Load todos from Supabase (ordered by created_at ascending) and render on app load. */
-async function loadAndRenderTodos() {
+async function loadAndRenderTodos(animateId) {
   const { data, error } = await supabase
     .from('todos')
     .select('id, text, is_complete, created_at')
@@ -73,7 +73,7 @@ async function loadAndRenderTodos() {
     return
   }
   setTodosFromDb(data ?? [])
-  renderTodoList(listEl)
+  renderTodoList(listEl, animateId ? { animateId } : undefined)
 }
 
 if (supabase) loadAndRenderTodos()
