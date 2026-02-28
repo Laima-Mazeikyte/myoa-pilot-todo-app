@@ -2,6 +2,17 @@
 let todos = [];
 
 /**
+ * Replaces the in-memory list with rows from the DB. Expects { id, text, is_complete, created_at }.
+ */
+export function setTodosFromDb(rows) {
+  todos = (rows || []).map((r) => ({
+    id: String(r.id),
+    text: r.text ?? '',
+    completed: Boolean(r.is_complete),
+  }));
+}
+
+/**
  * Adds a new todo. Trims text and skips if empty; creates an item with a UUID and completed: false.
  * Returns the new todo's id, or undefined if nothing was added.
  */

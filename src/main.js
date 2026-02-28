@@ -1,43 +1,80 @@
 /* Load global styles and todo data/UI helpers. */
 import './style.css'
-import { addTodo, toggleTodo, removeTodo, renderTodoList } from './todos.js'
+import { supabase } from './supabase.js'
+import { renderTodoList, setTodosFromDb } from './todos.js'
 
 /* DOM references: form, input, and the list container for todo items. */
 const form = document.getElementById('todo-form')
 const input = document.getElementById('todo-input')
 const listEl = document.getElementById('todo-list')
 
-/* On form submit: prevent page reload, add a todo from input text, clear input, then re-render the list. */
-form.addEventListener('submit', (e) => {
+/* On form submit: insert todo into Supabase, clear input, then refresh the list. */
+form.addEventListener('submit', async (e) => {
   e.preventDefault()
   const text = input.value.trim()
   if (!text) return
-  const newId = addTodo(text)
+  if (!supabase) {
+    console.error('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env to valid values.')
+    return
+  }
   input.value = ''
-  renderTodoList(listEl, newId ? { animateId: newId } : undefined)
+  const { error } = await supabase.from('todos').insert({ text, is_complete: false })
+  if (error) {
+    console.error('Failed to insert todo:', error)
+    input.value = text
+    return
+  }
+  await loadAndRenderTodos()
 })
 
-/* When a checkbox changes (toggle): find the todo by id and flip its completed state, then re-render. */
-listEl.addEventListener('change', (e) => {
+/* When a checkbox changes (toggle): update is_complete in Supabase by id, then refresh the display. */
+listEl.addEventListener('change', async (e) => {
   if (e.target.classList.contains('todo-item__checkbox')) {
     const li = e.target.closest('.todo-item')
-    if (li?.dataset.id) {
-      toggleTodo(li.dataset.id)
-      renderTodoList(listEl)
+    const id = li?.dataset.id
+    if (!id || !supabase) return
+    const isComplete = e.target.checked
+    const { error } = await supabase
+      .from('todos')
+      .update({ is_complete: isComplete })
+      .eq('id', id)
+    if (error) {
+      console.error('Failed to toggle todo:', error)
+      e.target.checked = !isComplete
+      return
     }
+    await loadAndRenderTodos()
   }
 })
 
-/* When delete button is clicked: remove the todo by id and re-render the list. */
-listEl.addEventListener('click', (e) => {
+/* When delete button is clicked: delete the todo from Supabase by id, then refresh the list. */
+listEl.addEventListener('click', async (e) => {
   if (e.target.classList.contains('todo-item__delete')) {
     const li = e.target.closest('.todo-item')
-    if (li?.dataset.id) {
-      removeTodo(li.dataset.id)
-      renderTodoList(listEl)
+    const id = li?.dataset.id
+    if (!id || !supabase) return
+    const { error } = await supabase.from('todos').delete().eq('id', id)
+    if (error) {
+      console.error('Failed to delete todo:', error)
+      return
     }
+    await loadAndRenderTodos()
   }
 })
 
-/* Initial render: show the current todo list when the app loads. */
-renderTodoList(listEl)
+/* Load todos from Supabase (ordered by created_at ascending) and render on app load. */
+async function loadAndRenderTodos() {
+  const { data, error } = await supabase
+    .from('todos')
+    .select('id, text, is_complete, created_at')
+    .order('created_at', { ascending: true })
+  if (error) {
+    console.error('Failed to load todos:', error)
+    return
+  }
+  setTodosFromDb(data ?? [])
+  renderTodoList(listEl)
+}
+
+if (supabase) loadAndRenderTodos()
+else console.error('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env to valid HTTP(S) URLs and key.')
