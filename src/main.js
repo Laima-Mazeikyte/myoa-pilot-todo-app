@@ -17,6 +17,7 @@ const authEmail = document.getElementById('auth-email')
 const authPassword = document.getElementById('auth-password')
 const authSubmit = document.getElementById('auth-submit')
 const authCancel = document.getElementById('auth-cancel')
+const migrationHint = document.getElementById('migration-hint')
 
 /** Current auth modal mode: 'create' (Create account) or 'signin' (Sign in). */
 let authModalMode = 'signin'
@@ -255,6 +256,14 @@ listEl.addEventListener('click', async (e) => {
   }
 })
 
+/** True if the error indicates the todos table is missing the user_id column. */
+function isMissingUserIdError(error) {
+  if (!error) return false
+  const msg = (error.message || '').toLowerCase()
+  const code = error.code
+  return code === '42703' || (msg.includes('user_id') && msg.includes('does not exist'))
+}
+
 /* Load todos from Supabase for the current user (ordered by created_at ascending) and render. */
 async function loadAndRenderTodos(animateId) {
   const user = await getCurrentUser()
@@ -266,8 +275,12 @@ async function loadAndRenderTodos(animateId) {
     .order('created_at', { ascending: true })
   if (error) {
     console.error('Failed to load todos:', error)
+    if (migrationHint && isMissingUserIdError(error)) {
+      migrationHint.hidden = false
+    }
     return
   }
+  if (migrationHint) migrationHint.hidden = true
   setTodosFromDb(data ?? [])
   renderTodoList(listEl, animateId ? { animateId } : undefined)
 }

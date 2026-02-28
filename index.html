@@ -30,6 +30,9 @@
             </div>
           </form>
         </div>
+        <div id="migration-hint" class="migration-hint" hidden aria-live="polite">
+          Database setup needed: run the migration in Supabase Dashboard → SQL Editor (see <code>supabase/migrations/apply_user_todos_manual.sql</code>).
+        </div>
         <!-- Form: submit adds a new todo; input and button are targeted by main.js -->
         <form class="todo-form" id="todo-form" aria-label="Add todo">
           <input

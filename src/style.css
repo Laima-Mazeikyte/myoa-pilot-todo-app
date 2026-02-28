@@ -186,6 +186,24 @@ body {
   color: var(--color-text);
 }
 
+/* Migration hint when DB is missing user_id column */
+.migration-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  background-color: var(--color-surface-hover);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.migration-hint code {
+  font-size: var(--font-size-xs);
+  background-color: var(--color-border);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
 /* Auth modal backdrop and dialog */
 .auth-modal-backdrop {
   position: fixed;
