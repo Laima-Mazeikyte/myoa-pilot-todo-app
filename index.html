@@ -12,7 +12,24 @@
       <div class="todo-app">
         <header class="todo-app__header">
           <h1 class="todo-app__title">Todo List</h1>
+          <div id="auth-block" class="auth-block" aria-live="polite">
+            <!-- Filled by main.js: guest (Create account / Sign in) or signed-in (email + Sign out) -->
+          </div>
         </header>
+        <!-- Auth modals (hidden by default) -->
+        <div id="auth-modal-backdrop" class="auth-modal-backdrop" hidden aria-hidden="true"></div>
+        <div id="auth-modal" class="auth-modal" role="dialog" aria-labelledby="auth-modal-title" hidden aria-hidden="true">
+          <h2 id="auth-modal-title" class="auth-modal__title">Sign in</h2>
+          <div id="auth-modal-message" class="auth-modal__message" role="status"></div>
+          <form id="auth-form" class="auth-form">
+            <label class="auth-form__label">Email <input type="email" id="auth-email" class="auth-form__input" autocomplete="email" required /></label>
+            <label class="auth-form__label">Password <input type="password" id="auth-password" class="auth-form__input" autocomplete="current-password" /></label>
+            <div class="auth-form__actions">
+              <button type="submit" id="auth-submit" class="auth-form__submit">Submit</button>
+              <button type="button" id="auth-cancel" class="auth-form__cancel">Cancel</button>
+            </div>
+          </form>
+        </div>
         <!-- Form: submit adds a new todo; input and button are targeted by main.js -->
         <form class="todo-form" id="todo-form" aria-label="Add todo">
           <input

@@ -116,12 +116,177 @@ body {
 }
 
 /* Page title above the form */
+.todo-app__header {
+  position: relative;
+  margin-bottom: var(--space-lg);
+}
+
 .todo-app__title {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
-  margin: 0 0 var(--space-lg);
+  margin: 0 0 var(--space-sm);
   color: var(--color-text);
+}
+
+/* Auth block: guest or signed-in state */
+.auth-block {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.auth-block__guest-text {
+  margin-right: var(--space-xs);
+}
+
+.auth-block__buttons {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.auth-block__btn {
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  font-family: inherit;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.auth-block__btn:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-border-focus);
+}
+
+.auth-block__btn--primary {
+  background-color: var(--color-accent);
+  color: var(--color-surface);
+  border-color: rgba(124, 157, 212, 0.4);
+}
+
+.auth-block__btn--primary:hover {
+  background-color: var(--color-accent-hover);
+}
+
+.auth-block__signed-in {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.auth-block__email {
+  color: var(--color-text);
+}
+
+/* Auth modal backdrop and dialog */
+.auth-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 100;
+}
+
+.auth-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 101;
+  width: 90%;
+  max-width: 360px;
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+
+.auth-modal__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-md);
+  color: var(--color-text);
+}
+
+.auth-modal__message {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+  min-height: 1.25em;
+}
+
+.auth-form__label {
+  display: block;
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-sm);
+  color: var(--color-text);
+}
+
+.auth-form__input {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-base);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.auth-form__input:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+}
+
+.auth-form .auth-form__label + .auth-form__label {
+  margin-top: var(--space-md);
+}
+
+.auth-form__actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
+.auth-form__submit {
+  padding: var(--space-sm) var(--space-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  font-family: inherit;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(124, 157, 212, 0.4);
+  background-color: var(--color-accent);
+  color: var(--color-surface);
+  cursor: pointer;
+}
+
+.auth-form__submit:hover {
+  background-color: var(--color-accent-hover);
+}
+
+.auth-form__cancel {
+  padding: var(--space-sm) var(--space-lg);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.auth-form__cancel:hover {
+  color: var(--color-text);
+  background-color: var(--color-surface-hover);
 }
 
 .todo-app {

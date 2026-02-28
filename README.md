@@ -7,6 +7,7 @@ A simple todo app built with Vite, vanilla JavaScript, and Supabase for persiste
 - Add new todos
 - Mark as complete (and mark as incomplete)
 - Delete a todo
+- **Auth:** Use the app as a guest (anonymous); create an account or sign in to attach your todos to your account. Signing out gives you a new guest session.
 
 ## Tech stack
 
@@ -57,10 +58,12 @@ Get these from your [Supabase Dashboard](https://app.supabase.com) → Project S
 
 ### 4. Set up the database
 
-Run the migration in the Supabase SQL Editor (Dashboard → SQL Editor), or apply via Supabase CLI:
+Run the migrations in the Supabase SQL Editor (Dashboard → SQL Editor), or apply via Supabase CLI:
 
-- **SQL Editor:** paste and run the contents of `supabase/migrations/20260228151234_create_todos_table.sql`
+- **SQL Editor:** run in order: `20260228151234_create_todos_table.sql`, `20260228215530_add_user_todos.sql`, `20260228220000_migrate_anonymous_todos.sql`
 - **CLI:** from project root, `supabase db push` (if Supabase CLI is linked to your project)
+
+**Hosted Supabase:** In the Dashboard, enable **Anonymous** sign-ins and **Manual linking** under Auth → Providers so guests can use the app and later create an account or sign in (their todos are then attached to their account). Signing out creates a new anonymous session.
 
 ### 5. Start the dev server
 
