@@ -4,26 +4,52 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet" />
     <title>Todo List</title>
   </head>
   <body>
     <!-- Main app wrapper: centered, max-width controlled by CSS -->
     <div id="app">
+      <header class="todo-app__header">
+        <h1 class="todo-app__title">Todo List</h1>
+        <div id="auth-block" class="auth-block" aria-live="polite">
+          <!-- Filled by main.js: guest (Create account / Sign in) or signed-in (email + Sign out) -->
+        </div>
+      </header>
       <div class="todo-app">
-        <header class="todo-app__header">
-          <h1 class="todo-app__title">Todo List</h1>
-          <div id="auth-block" class="auth-block" aria-live="polite">
-            <!-- Filled by main.js: guest (Create account / Sign in) or signed-in (email + Sign out) -->
-          </div>
-        </header>
         <!-- Auth modals (hidden by default) -->
         <div id="auth-modal-backdrop" class="auth-modal-backdrop" hidden aria-hidden="true"></div>
         <div id="auth-modal" class="auth-modal" role="dialog" aria-labelledby="auth-modal-title" hidden aria-hidden="true">
           <h2 id="auth-modal-title" class="auth-modal__title">Sign in</h2>
           <div id="auth-modal-message" class="auth-modal__message" role="status"></div>
           <form id="auth-form" class="auth-form">
-            <label class="auth-form__label">Email <input type="email" id="auth-email" class="auth-form__input" autocomplete="email" required /></label>
-            <label class="auth-form__label">Password <input type="password" id="auth-password" class="auth-form__input" autocomplete="current-password" /></label>
+            <div id="auth-form-email-row">
+              <label class="auth-form__label">Email <input type="email" id="auth-email" class="auth-form__input" autocomplete="email" required /></label>
+            </div>
+            <div id="auth-form-password-row">
+              <label class="auth-form__label">Password
+                <div class="auth-form__password-wrap">
+                  <input type="password" id="auth-password" class="auth-form__input auth-form__input--with-toggle" autocomplete="current-password" />
+                  <button type="button" class="auth-form__password-toggle" aria-label="Show password">
+                    <svg class="auth-form__password-icon auth-form__password-icon--show" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <svg class="auth-form__password-icon auth-form__password-icon--hide" hidden xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                  </button>
+                </div>
+              </label>
+            </div>
+            <p id="auth-form-recover" class="auth-form__recover">
+              <button type="button" class="auth-form__link" data-auth-action="recover">Forgot password?</button>
+            </p>
+            <p id="auth-form-back" class="auth-form__back" hidden>
+              <button type="button" class="auth-form__link" data-auth-action="signin">Back to sign in</button>
+            </p>
+            <div id="auth-form-set-password" class="auth-form__set-password" hidden>
+              <label class="auth-form__label">New password <input type="password" id="auth-new-password" class="auth-form__input" autocomplete="new-password" /></label>
+              <label class="auth-form__label">Confirm password <input type="password" id="auth-password-confirm" class="auth-form__input" autocomplete="new-password" /></label>
+            </div>
             <div class="auth-form__actions">
               <button type="submit" id="auth-submit" class="auth-form__submit">Submit</button>
               <button type="button" id="auth-cancel" class="auth-form__cancel">Cancel</button>
@@ -47,6 +73,8 @@
         <ul class="todo-list" id="todo-list" aria-label="Todo items"></ul>
       </div>
     </div>
+    <!-- Toast for transient messages (e.g. signed in) -->
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden aria-hidden="true"></div>
     <!-- Entry point: loads styles and wires up form + list events -->
     <script type="module" src="/src/main.js"></script>
   </body>
