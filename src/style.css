@@ -1,27 +1,27 @@
 /* ========== Design tokens: neumorphic colors, shadows, spacing, typography, radius ========== */
 :root {
-  /* ----- Neumorphic light palette (grayscale base) ----- */
-  --color-bg: #e4e4e4;
-  --color-surface: #e4e4e4;
-  --color-surface-hover: #e8e8e8;
-  --color-text: #3a3a3a;
-  --color-text-muted: #6b6b6b;
-  --color-border: rgba(0, 0, 0, 0.06);
-  --color-border-focus: #10b981;
-  --color-accent: #10b981;
-  --color-accent-hover: #0d9668;
-  --color-danger: #c08078;
-  --color-danger-hover: #b07068;
-  --color-success: #6a9a7a;
-
-  /* ----- Neumorphic shadows (light from top-left) ----- */
-  --shadow-neu-raised: 6px 6px 12px #d0d0d0, -6px -6px 12px #ffffff;
-  --shadow-neu-raised-sm: 4px 4px 8px #d0d0d0, -4px -4px 8px #ffffff;
-  --shadow-neu-inset: inset 4px 4px 8px #d0d0d0, inset -4px -4px 8px #ffffff;
-  --shadow-neu-inset-sm: inset 2px 2px 4px #d0d0d0, inset -2px -2px 4px #ffffff;
-  --shadow-neu-pressed: inset 2px 2px 4px #d0d0d0, inset -2px -2px 4px #e8e8e8;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+  /* ----- Neumorphic dark palette ----- */
+  --color-bg: #2a2a2a;
+  --color-surface: #2a2a2a;
+  --color-surface-hover: #303030;
+  --color-text: rgba(255, 255, 255, 0.92);
+  --color-text-muted: rgba(255, 255, 255, 0.55);
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-focus: #22d978;
+  --color-accent: #22d978;
+  --color-accent-hover: #34e88a;
+  --color-danger: #b07068;
+  --color-danger-hover: #c08078;
+  --color-success: #5a8a6a;
+  /* Raised: dark shadow (bottom-right) + lighter highlight (top-left) */
+  --shadow-neu-raised: 6px 6px 12px #1e1e1e, -6px -6px 12px #363636;
+  --shadow-neu-raised-sm: 4px 4px 8px #1e1e1e, -4px -4px 8px #363636;
+  /* Inset: inner dark (top-left) + inner light (bottom-right) */
+  --shadow-neu-inset: inset 4px 4px 8px #1e1e1e, inset -4px -4px 8px #363636;
+  --shadow-neu-inset-sm: inset 2px 2px 4px #1e1e1e, inset -2px -2px 4px #363636;
+  --shadow-neu-pressed: inset 2px 2px 4px #1e1e1e, inset -2px -2px 4px #2e2e2e;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.35);
 
   /* ----- Spacing scale (xs → xl) ----- */
   --space-xs: 0.25rem;   /* 4px */
@@ -56,7 +56,7 @@
   font-family: var(--font-body);
   line-height: var(--line-height-normal);
   font-weight: var(--font-weight-normal);
-  color-scheme: light dark;
+  color-scheme: dark;
   color: var(--color-text);
   background-color: var(--color-bg);
   /* Smoother font rendering and no synthetic bold/italic */
@@ -265,7 +265,7 @@ body {
 }
 
 .auth-block__btn:hover {
-  box-shadow: 5px 5px 10px #d0d0d0, -5px -5px 10px #ffffff;
+  box-shadow: 5px 5px 10px #1e1e1e, -5px -5px 10px #363636;
 }
 
 .auth-block__btn:active {
@@ -280,7 +280,7 @@ body {
 
 .auth-block__btn--primary:hover {
   background-color: var(--color-accent-hover);
-  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1), -5px -5px 10px rgba(255, 255, 255, 0.3);
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3), -5px -5px 10px rgba(255, 255, 255, 0.05);
 }
 
 .auth-block__signed-in {
@@ -1060,7 +1060,7 @@ body {
 /* Completed todos: slightly softer shadow */
 .todo-item--completed {
   background-color: var(--color-surface-hover);
-  box-shadow: 3px 3px 6px #d0d0d0, -3px -3px 6px #ffffff;
+  box-shadow: 3px 3px 6px #1e1e1e, -3px -3px 6px #363636;
 }
 
 /* Completed todo text: strikethrough and muted color */
@@ -1467,43 +1467,3 @@ button:focus-visible,
     min-height: 44px;
   }
 }
-
-/* Dark mode: neumorphic dark (inverted shadow logic for depth) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #2a2a2a;
-    --color-surface: #2a2a2a;
-    --color-surface-hover: #303030;
-    --color-text: rgba(255, 255, 255, 0.92);
-    --color-text-muted: rgba(255, 255, 255, 0.55);
-    --color-border: rgba(255, 255, 255, 0.06);
-    --color-border-focus: #22d978;
-    --color-accent: #22d978;
-    --color-accent-hover: #34e88a;
-    --color-danger: #b07068;
-    --color-danger-hover: #c08078;
-    --color-success: #5a8a6a;
-    /* Raised: dark shadow (bottom-right) + lighter highlight (top-left) */
-    --shadow-neu-raised: 6px 6px 12px #1e1e1e, -6px -6px 12px #363636;
-    --shadow-neu-raised-sm: 4px 4px 8px #1e1e1e, -4px -4px 8px #363636;
-    /* Inset: inner dark (top-left) + inner light (bottom-right) */
-    --shadow-neu-inset: inset 4px 4px 8px #1e1e1e, inset -4px -4px 8px #363636;
-    --shadow-neu-inset-sm: inset 2px 2px 4px #1e1e1e, inset -2px -2px 4px #363636;
-    --shadow-neu-pressed: inset 2px 2px 4px #1e1e1e, inset -2px -2px 4px #2e2e2e;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.35);
-  }
-
-  .todo-item--completed {
-    box-shadow: 3px 3px 6px #1e1e1e, -3px -3px 6px #363636;
-  }
-
-  .auth-block__btn:hover {
-    box-shadow: 5px 5px 10px #1e1e1e, -5px -5px 10px #363636;
-  }
-
-  .auth-block__btn--primary:hover {
-    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3), -5px -5px 10px rgba(255, 255, 255, 0.05);
-  }
-}
-
