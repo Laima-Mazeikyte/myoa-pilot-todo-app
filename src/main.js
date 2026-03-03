@@ -45,6 +45,7 @@ const COPY = {
     passwordTooShort: 'Password must be at least 6 characters.',
     passwordsDontMatch: 'Passwords do not match.',
     rateLimit: 'Too many attempts. Please try again in a few minutes.',
+    emailRateLimit: 'Too many verification emails sent. Please try again in a few minutes.',
     emailAlreadyRegistered: 'This email is already registered. Sign in instead.',
     createAccountError: 'Failed to create account.',
     signInError: 'Sign in failed.',
@@ -612,8 +613,8 @@ async function handleCreateAccount(email, password) {
   }
   const { data, error } = await supabase.auth.updateUser({ email: emailTrimmed })
   if (error) {
-    if (error.status === 429 || error.message?.toLowerCase().includes('too many') || error.message?.toLowerCase().includes('rate limit')) {
-      setAuthMessage(msg.rateLimit)
+    if (error.code === 'over_email_send_rate_limit' || error.status === 429 || error.message?.toLowerCase().includes('too many') || error.message?.toLowerCase().includes('rate limit')) {
+      setAuthMessage(error.code === 'over_email_send_rate_limit' ? msg.emailRateLimit : msg.rateLimit)
       return
     }
     if (error.message?.toLowerCase().includes('already') || error.code === 'user_already_exists') {
