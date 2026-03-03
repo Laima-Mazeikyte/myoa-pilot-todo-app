@@ -4,6 +4,13 @@ let todos = [];
 const IMPORTANCE_ORDER = { high: 3, medium: 2, low: 1 };
 const VALID_STATUSES = ['tasks', 'to_do', 'doing', 'completed'];
 
+const EMPTY_STATE_MESSAGES = {
+  tasks: 'Clean slate.',
+  to_do: 'Nothing planned.',
+  doing: 'Take it easy.',
+  completed: 'Nothing done yet. No judgment.',
+};
+
 /**
  * Replaces the in-memory list with rows from the DB.
  * Expects { id, text, is_complete, status?, created_at, importance, due_date, category }.
@@ -164,6 +171,14 @@ export function renderTodoColumn(container, status, options = {}) {
   container.innerHTML = '';
   for (const todo of list) {
     container.appendChild(createTodoCardElement(todo, categories));
+  }
+  if (list.length === 0) {
+    const msg = EMPTY_STATE_MESSAGES[status] ?? '';
+    const emptyLi = document.createElement('li');
+    emptyLi.className = 'kanban__empty';
+    emptyLi.setAttribute('aria-live', 'polite');
+    emptyLi.textContent = msg;
+    container.appendChild(emptyLi);
   }
 
   const animateId = options?.animateId;

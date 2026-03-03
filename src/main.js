@@ -59,6 +59,19 @@ const COPY = {
   toast: {
     signedIn: 'Signed in successfully',
   },
+  // Onboarding guide (step-by-step for new visitors)
+  onboarding: {
+    title: 'How to use this app',
+    steps: [
+      { title: 'Add a task', text: 'Type in the input below and click "Add to inbox" to create a task. You can also set importance, due date, and category before adding.' },
+      { title: 'Move tasks through columns', text: 'Drag cards between Inbox, To do, Doing, and Completed. You can also use the + button on a column to add a task there directly.' },
+      { title: 'Save your todos', text: 'Create an account to store your todos so they\'re available on any device and never lost.' },
+    ],
+    next: 'Next',
+    back: 'Back',
+    createAccount: 'Create account',
+    maybeLater: 'Maybe later',
+  },
   // Todo list
   deleteConfirm: 'Delete this item?',
   deleteConfirmTitle: 'Delete card',
@@ -95,6 +108,7 @@ const COPY = {
 // Timing (designer / UX tweaks)
 const TOAST_DURATION_MS = 4000
 const SIGN_OUT_TIMEOUT_MS = 3000
+const ONBOARDING_SEEN_KEY = 'todo-app-onboarding-seen'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    DOM REFERENCES
@@ -176,6 +190,10 @@ const deleteConfirmCancel = document.getElementById('delete-confirm-cancel')
 
 // Toast (floating message)
 const toastEl = document.getElementById('toast')
+
+// Onboarding guide (new visitors)
+const onboardingGuide = document.getElementById('onboarding-guide')
+const onboardingText = document.getElementById('onboarding-text')
 
 /** Id of the todo to delete when user confirms in the delete-confirm modal. */
 let pendingDeleteId = null
@@ -337,6 +355,74 @@ function showToast(message) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
+   ONBOARDING (step-by-step guide for new visitors)
+   Shown to anonymous users until dismissed or they create an account.
+   ───────────────────────────────────────────────────────────────────────────── */
+let onboardingStepIndex = 0
+
+function renderOnboardingStep() {
+  if (!onboardingText) return
+  const ob = COPY.onboarding
+  const steps = ob.steps
+  const step = steps[onboardingStepIndex] ?? steps[0]
+  onboardingText.textContent = step.text
+  const dots = onboardingGuide?.querySelectorAll('.onboarding__step-dot')
+  if (dots) {
+    dots.forEach((d, i) => {
+      d.setAttribute('aria-selected', i === onboardingStepIndex ? 'true' : 'false')
+      d.setAttribute('tabindex', i === onboardingStepIndex ? '0' : '-1')
+    })
+  }
+}
+
+function dismissOnboarding() {
+  try {
+    localStorage.setItem(ONBOARDING_SEEN_KEY, 'true')
+  } catch (_) {}
+  if (onboardingGuide) {
+    onboardingGuide.hidden = true
+    onboardingGuide.setAttribute('aria-hidden', 'true')
+  }
+}
+
+function showOnboardingIfNeeded(user) {
+  if (!user || !isAnonymous(user)) {
+    if (onboardingGuide) {
+      onboardingGuide.hidden = true
+      onboardingGuide.setAttribute('aria-hidden', 'true')
+    }
+    return
+  }
+  try {
+    if (localStorage.getItem(ONBOARDING_SEEN_KEY) === 'true') {
+      if (onboardingGuide) {
+        onboardingGuide.hidden = true
+        onboardingGuide.setAttribute('aria-hidden', 'true')
+      }
+      return
+    }
+  } catch (_) {}
+  onboardingStepIndex = 0
+  renderOnboardingStep()
+  if (onboardingGuide) {
+    onboardingGuide.hidden = false
+    onboardingGuide.removeAttribute('aria-hidden')
+  }
+}
+
+function setupOnboardingListeners() {
+  onboardingGuide?.addEventListener('click', (e) => {
+    const dot = e.target.closest('.onboarding__step-dot')
+    if (!dot) return
+    const step = parseInt(dot.getAttribute('data-step'), 10)
+    if (Number.isFinite(step) && step >= 0 && step < COPY.onboarding.steps.length) {
+      onboardingStepIndex = step
+      renderOnboardingStep()
+    }
+  })
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
    AUTH ACTIONS (sign in, create account, sign out, recover password, set password)
    These call Supabase and then update the UI (auth block, modal message, toast).
    ───────────────────────────────────────────────────────────────────────────── */
@@ -416,6 +502,7 @@ async function handleCreateAccount(email, password) {
     }
   }
   closeAuthModal()
+  dismissOnboarding()
   await loadAndRenderTodos()
   updateAuthBlock(data?.user ?? (await getCurrentUser()))
 }
@@ -436,6 +523,7 @@ async function handleSignIn(email, password, anonymousUserId) {
     if (rpcError) console.error('Failed to migrate anonymous todos:', rpcError)
   }
   closeAuthModal()
+  dismissOnboarding()
   showToast(COPY.toast.signedIn)
   await loadAndRenderTodos()
   updateAuthBlock(data?.user ?? (await getCurrentUser()))
@@ -1181,6 +1269,8 @@ async function init() {
   await loadCategories()
   await loadAndRenderTodos()
   updateAuthBlock(user)
+  setupOnboardingListeners()
+  showOnboardingIfNeeded(user)
 
   supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN') {
@@ -1204,6 +1294,7 @@ async function init() {
       return
     }
     updateAuthBlock(u)
+    showOnboardingIfNeeded(u)
     if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
       await loadCategories()
       await loadAndRenderTodos()

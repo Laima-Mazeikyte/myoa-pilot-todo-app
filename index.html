@@ -18,7 +18,17 @@
       <header class="todo-app__header">
         <div class="todo-app__header-left">
           <div class="todo-app__header-top">
-            <h1 class="todo-app__title">Todo -iiism</h1>
+            <div class="todo-app__header-title-area">
+              <h1 class="todo-app__title">Todo -iiism</h1>
+              <div id="onboarding-guide" class="onboarding" aria-label="How to use this app" hidden>
+                <p id="onboarding-text" class="onboarding__text"></p>
+                <div class="onboarding__step-dots" role="tablist" aria-label="Steps">
+                  <span role="tab" class="onboarding__step-dot" data-step="0" aria-selected="true" tabindex="0"></span>
+                  <span role="tab" class="onboarding__step-dot" data-step="1" aria-selected="false" tabindex="-1"></span>
+                  <span role="tab" class="onboarding__step-dot" data-step="2" aria-selected="false" tabindex="-1"></span>
+                </div>
+              </div>
+            </div>
             <div id="auth-block" class="auth-block" aria-live="polite"></div>
           </div>
           <div class="todo-filters" id="todo-filters" aria-label="Filter and sort tasks">
