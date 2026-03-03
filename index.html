@@ -18,6 +18,11 @@
       <header class="todo-app__header">
         <div class="todo-app__header-left">
           <div class="todo-app__header-top">
+            <button type="button" id="hamburger-btn" class="hamburger-btn" aria-label="Menu" aria-expanded="false" aria-controls="hamburger-menu">
+              <span class="hamburger-btn__line"></span>
+              <span class="hamburger-btn__line"></span>
+              <span class="hamburger-btn__line"></span>
+            </button>
             <div class="todo-app__header-title-area">
               <h1 class="todo-app__title">Todo -iiism</h1>
               <div id="onboarding-guide" class="onboarding" aria-label="How to use this app" hidden>
@@ -64,6 +69,13 @@
           </div>
         </div>
       </header>
+      <!-- Hamburger menu (mobile): Create account / Sign in or Signed in + Sign out -->
+      <div id="hamburger-menu" class="hamburger-menu" aria-hidden="true">
+        <div id="hamburger-menu-backdrop" class="hamburger-menu__backdrop"></div>
+        <div class="hamburger-menu__panel">
+          <div id="hamburger-menu-content" class="hamburger-menu__content"></div>
+        </div>
+      </div>
         <!-- Auth modals (hidden by default) -->
         <div id="auth-modal-backdrop" class="auth-modal-backdrop" hidden aria-hidden="true"></div>
         <div id="auth-modal" class="auth-modal" role="dialog" aria-labelledby="auth-modal-title" hidden aria-hidden="true">
@@ -248,6 +260,11 @@
             <button type="button" class="kanban__add-btn" data-add-to-status="completed" aria-label="Add task to Completed">+</button>
           </div>
         </div>
+        <!-- Mobile-only: sticky bottom add bar -->
+        <form id="mobile-add-bar" class="mobile-add-bar" aria-label="Add todo">
+          <input type="text" id="mobile-add-bar-input" class="mobile-add-bar__input" placeholder="What needs to be done?" autocomplete="off" aria-label="Todo description" />
+          <button type="submit" class="mobile-add-bar__submit">Add</button>
+        </form>
     </div>
     <!-- Toast for transient messages (e.g. signed in) -->
     <div id="toast" class="toast" role="status" aria-live="polite" hidden aria-hidden="true"></div>

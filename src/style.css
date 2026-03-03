@@ -786,6 +786,15 @@ body {
   box-shadow: var(--shadow-neu-pressed);
 }
 
+/* Onboarding step 0: emphasize "Add to inbox" with accent color */
+.todo-form__submit.todo-form__submit--onboarding-highlight {
+  color: var(--color-accent);
+  box-shadow: var(--shadow-neu-raised-sm), 0 0 0 2px var(--color-border-focus);
+}
+.todo-form__submit.todo-form__submit--onboarding-highlight:hover {
+  color: var(--color-accent-hover);
+}
+
 /* Onboarding guide: in header, left-aligned (first in header-top) */
 .onboarding {
   margin: 0;
@@ -1187,6 +1196,223 @@ button:focus-visible,
 
 .toast[hidden] {
   display: none;
+}
+
+/* ----- Hamburger button (visible only on mobile) ----- */
+.hamburger-btn {
+  display: none;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  box-shadow: var(--shadow-neu-inset-sm);
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  transition: box-shadow 0.2s ease;
+}
+
+.hamburger-btn:hover,
+.hamburger-btn:focus {
+  outline: none;
+  box-shadow: var(--shadow-neu-inset-sm), 0 0 0 2px var(--color-border-focus);
+}
+
+.hamburger-btn__line {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background-color: var(--color-text);
+  border-radius: 1px;
+}
+
+/* ----- Hamburger menu (mobile) ----- */
+.hamburger-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.hamburger-menu.hamburger-menu--open {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.hamburger-menu__backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.hamburger-menu--open .hamburger-menu__backdrop {
+  opacity: 1;
+}
+
+.hamburger-menu__panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(280px, 85vw);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  transform: translateX(-100%);
+  transition: transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.hamburger-menu--open .hamburger-menu__panel {
+  transform: translateX(0);
+}
+
+.hamburger-menu__content {
+  padding: var(--space-xl);
+  padding-top: calc(var(--space-xl) + 60px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.hamburger-menu__content .auth-block__btn,
+.hamburger-menu__content .auth-block__email {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: var(--space-sm) var(--space-md);
+}
+
+.hamburger-menu__content .auth-block__signed-in {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* ----- Mobile add bar (visible only on mobile) ----- */
+.mobile-add-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--space-sm);
+  padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom, 0px));
+  gap: var(--space-sm);
+  background-color: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+  z-index: 40;
+  flex-direction: row;
+  align-items: center;
+}
+
+.mobile-add-bar__input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-base);
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-neu-inset-sm);
+}
+
+.mobile-add-bar__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.mobile-add-bar__input:focus {
+  outline: none;
+  box-shadow: var(--shadow-neu-inset-sm), 0 0 0 2px var(--color-border-focus);
+}
+
+.mobile-add-bar__submit {
+  flex-shrink: 0;
+  min-height: 44px;
+  min-width: 44px;
+  padding: var(--space-sm) var(--space-md);
+  font-weight: var(--font-weight-medium);
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-accent);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: var(--shadow-neu-raised-sm);
+  transition: box-shadow 0.2s ease;
+}
+
+.mobile-add-bar__submit:hover,
+.mobile-add-bar__submit:focus {
+  outline: none;
+  box-shadow: var(--shadow-neu-raised-sm), 0 0 0 2px var(--color-border-focus);
+}
+
+/* ----- Mobile layout (single-column Inbox, hamburger, bottom bar) ----- */
+@media (max-width: 768px) {
+  .hamburger-btn {
+    display: flex;
+  }
+
+  .todo-app__header-top #auth-block,
+  .todo-app__header-top #onboarding-guide,
+  .todo-filters {
+    display: none !important;
+  }
+
+  .todo-form {
+    display: none !important;
+  }
+
+  .mobile-add-bar {
+    display: flex;
+  }
+
+  #app {
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .kanban {
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+  }
+
+  .kanban__column {
+    display: none;
+    min-width: 0;
+  }
+
+  .kanban__column[data-status="tasks"] {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .kanban__list {
+    min-height: 120px;
+  }
+
+  .todo-item {
+    min-height: 44px;
+  }
+
+  .todo-item__checkbox-wrap,
+  .todo-item__delete {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 
 /* Dark mode: neumorphic dark (inverted shadow logic for depth) */

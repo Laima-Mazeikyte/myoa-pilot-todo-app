@@ -108,7 +108,8 @@ const COPY = {
 // Timing (designer / UX tweaks)
 const TOAST_DURATION_MS = 4000
 const SIGN_OUT_TIMEOUT_MS = 3000
-const ONBOARDING_SEEN_KEY = 'todo-app-onboarding-seen'
+const ONBOARDING_VISIT_COUNT_KEY = 'todo-app-onboarding-visit-count'
+const ONBOARDING_MAX_VISITS = 3
 
 /* ─────────────────────────────────────────────────────────────────────────────
    DOM REFERENCES
@@ -139,6 +140,7 @@ const authPasswordConfirm = document.getElementById('auth-password-confirm')
 
 // Todo: Kanban board and column lists
 const form = document.getElementById('todo-form')
+const todoSubmitBtn = form?.querySelector('.todo-form__submit')
 const input = document.getElementById('todo-input')
 const kanbanEl = document.getElementById('kanban')
 
@@ -187,6 +189,16 @@ const deleteConfirmTitle = document.getElementById('delete-confirm-title')
 const deleteConfirmMessage = document.getElementById('delete-confirm-message')
 const deleteConfirmYes = document.getElementById('delete-confirm-yes')
 const deleteConfirmCancel = document.getElementById('delete-confirm-cancel')
+
+// Hamburger menu (mobile)
+const hamburgerBtn = document.getElementById('hamburger-btn')
+const hamburgerMenu = document.getElementById('hamburger-menu')
+const hamburgerMenuContent = document.getElementById('hamburger-menu-content')
+const hamburgerMenuBackdrop = document.getElementById('hamburger-menu-backdrop')
+
+// Mobile add bar
+const mobileAddBar = document.getElementById('mobile-add-bar')
+const mobileAddBarInput = document.getElementById('mobile-add-bar-input')
 
 // Toast (floating message)
 const toastEl = document.getElementById('toast')
@@ -260,6 +272,7 @@ function updateAuthBlock(user) {
       </span>
     `
   }
+  updateHamburgerMenu(user)
 }
 
 function onAuthBlockClick(e) {
@@ -277,10 +290,93 @@ function onAuthBlockClick(e) {
 if (authBlock) authBlock.addEventListener('click', onAuthBlockClick, true)
 
 /* ─────────────────────────────────────────────────────────────────────────────
+   HAMBURGER MENU (mobile): Create account / Sign in or Signed in + Sign out
+   ───────────────────────────────────────────────────────────────────────────── */
+function closeHamburgerMenu() {
+  if (!hamburgerMenu || !hamburgerBtn) return
+  hamburgerMenu.classList.remove('hamburger-menu--open')
+  hamburgerMenu.setAttribute('aria-hidden', 'true')
+  hamburgerBtn.setAttribute('aria-expanded', 'false')
+}
+
+function openHamburgerMenu() {
+  if (!hamburgerMenu || !hamburgerBtn) return
+  hamburgerMenu.classList.add('hamburger-menu--open')
+  hamburgerMenu.setAttribute('aria-hidden', 'false')
+  hamburgerBtn.setAttribute('aria-expanded', 'true')
+}
+
+function updateHamburgerMenu(user) {
+  if (!hamburgerMenuContent) return
+  if (!user) {
+    hamburgerMenuContent.innerHTML = ''
+    return
+  }
+  const { authBlock: ab } = COPY
+  if (isAnonymous(user) && user.email) {
+    hamburgerMenuContent.innerHTML = `
+      <span class="auth-block__guest-text">${escapeHtml(ab.verificationSent(user.email))}</span>
+      <div class="auth-block__buttons">
+        <button type="button" class="auth-block__btn" data-auth-action="signin">${escapeHtml(ab.signIn)}</button>
+      </div>
+    `
+  } else if (isAnonymous(user)) {
+    hamburgerMenuContent.innerHTML = `
+      <span class="auth-block__guest-text">${escapeHtml(ab.guestLabel)}</span>
+      <div class="auth-block__buttons">
+        <button type="button" class="auth-block__btn auth-block__btn--primary" data-auth-action="create">${escapeHtml(ab.createAccount)}</button>
+        <button type="button" class="auth-block__btn" data-auth-action="signin">${escapeHtml(ab.signIn)}</button>
+      </div>
+    `
+  } else {
+    const emailLabel = user.email ? ab.signedInAs(user.email) : ab.signedInFallback
+    hamburgerMenuContent.innerHTML = `
+      <span class="auth-block__signed-in">
+        <span class="auth-block__email">${escapeHtml(emailLabel)}</span>
+        <button type="button" class="auth-block__btn" data-auth-action="signout">${escapeHtml(ab.signOut)}</button>
+      </span>
+    `
+  }
+}
+
+function onHamburgerMenuClick(e) {
+  const btn = e.target.closest('button[data-auth-action]')
+  if (!btn || !hamburgerMenuContent?.contains(btn)) return
+  const action = btn.dataset.authAction
+  closeHamburgerMenu()
+  if (action === 'signout') {
+    e.preventDefault()
+    e.stopPropagation()
+    handleSignOut()
+  } else {
+    openAuthModal(action)
+  }
+}
+
+if (hamburgerBtn) {
+  hamburgerBtn.addEventListener('click', () => {
+    if (hamburgerMenu?.classList.contains('hamburger-menu--open')) {
+      closeHamburgerMenu()
+    } else {
+      openHamburgerMenu()
+    }
+  })
+}
+if (hamburgerMenuBackdrop) hamburgerMenuBackdrop.addEventListener('click', closeHamburgerMenu)
+if (hamburgerMenuContent) hamburgerMenuContent.addEventListener('click', onHamburgerMenuClick, true)
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && hamburgerMenu?.classList.contains('hamburger-menu--open')) {
+    closeHamburgerMenu()
+  }
+})
+
+/* ─────────────────────────────────────────────────────────────────────────────
    AUTH MODAL (dialog)
    Open/close, per-mode title + submit label, form row visibility, messages.
    ───────────────────────────────────────────────────────────────────────────── */
 function openAuthModal(mode) {
+  closeHamburgerMenu()
   authModalMode = mode
   const { modal } = COPY
   const titles = modal.titles
@@ -367,6 +463,32 @@ function showToast(message) {
    Shown to anonymous users until dismissed or they create an account.
    ───────────────────────────────────────────────────────────────────────────── */
 let onboardingStepIndex = 0
+const ONBOARDING_HIGHLIGHT_CLASS = 'todo-form__submit--onboarding-highlight'
+
+function getOnboardingVisitCount() {
+  try {
+    const n = parseInt(localStorage.getItem(ONBOARDING_VISIT_COUNT_KEY), 10)
+    return Number.isFinite(n) ? Math.max(0, n) : 0
+  } catch (_) {
+    return 0
+  }
+}
+
+function incrementOnboardingVisitCount() {
+  try {
+    const count = getOnboardingVisitCount() + 1
+    localStorage.setItem(ONBOARDING_VISIT_COUNT_KEY, String(count))
+    return count
+  } catch (_) {
+    return 0
+  }
+}
+
+function updateSubmitButtonHighlight() {
+  if (!todoSubmitBtn) return
+  const showHighlight = onboardingGuide && !onboardingGuide.hidden && onboardingStepIndex === 0
+  todoSubmitBtn.classList.toggle(ONBOARDING_HIGHLIGHT_CLASS, showHighlight)
+}
 
 function renderOnboardingStep() {
   if (!onboardingText) return
@@ -381,16 +503,15 @@ function renderOnboardingStep() {
       d.setAttribute('tabindex', i === onboardingStepIndex ? '0' : '-1')
     })
   }
+  updateSubmitButtonHighlight()
 }
 
 function dismissOnboarding() {
-  try {
-    localStorage.setItem(ONBOARDING_SEEN_KEY, 'true')
-  } catch (_) {}
   if (onboardingGuide) {
     onboardingGuide.hidden = true
     onboardingGuide.setAttribute('aria-hidden', 'true')
   }
+  updateSubmitButtonHighlight()
 }
 
 function showOnboardingIfNeeded(user) {
@@ -399,14 +520,17 @@ function showOnboardingIfNeeded(user) {
       onboardingGuide.hidden = true
       onboardingGuide.setAttribute('aria-hidden', 'true')
     }
+    updateSubmitButtonHighlight()
     return
   }
   try {
-    if (localStorage.getItem(ONBOARDING_SEEN_KEY) === 'true') {
+    const visitCount = getOnboardingVisitCount()
+    if (visitCount > ONBOARDING_MAX_VISITS) {
       if (onboardingGuide) {
         onboardingGuide.hidden = true
         onboardingGuide.setAttribute('aria-hidden', 'true')
       }
+      updateSubmitButtonHighlight()
       return
     }
   } catch (_) {}
@@ -416,6 +540,7 @@ function showOnboardingIfNeeded(user) {
     onboardingGuide.hidden = false
     onboardingGuide.removeAttribute('aria-hidden')
   }
+  updateSubmitButtonHighlight()
 }
 
 function setupOnboardingListeners() {
@@ -850,6 +975,35 @@ form.addEventListener('submit', (e) => {
   input.value = ''
   openAddTodoModal()
 })
+
+// Mobile add bar: add task to Inbox only (no modal)
+if (mobileAddBar && mobileAddBarInput) {
+  mobileAddBar.addEventListener('submit', async (e) => {
+    e.preventDefault?.()
+    const text = mobileAddBarInput.value.trim()
+    if (!text || !supabase) return
+    const user = await getCurrentUser()
+    if (!user) return
+    let result = await supabase
+      .from('todos')
+      .insert({ text, is_complete: false, status: 'tasks', user_id: user.id, importance: null, due_date: null, category: null })
+      .select('id')
+      .single()
+    if (result.error && (result.error.message || '').includes('status') && (result.error.message || '').includes('does not exist')) {
+      result = await supabase
+        .from('todos')
+        .insert({ text, is_complete: false, user_id: user.id, importance: null, due_date: null, category: null })
+        .select('id')
+        .single()
+    }
+    if (result.error) {
+      console.error('Failed to insert todo:', result.error)
+      return
+    }
+    mobileAddBarInput.value = ''
+    await loadAndRenderTodos(result.data?.id)
+  })
+}
 
 // Column + button: add task directly to that column
 ;(kanbanEl || document).addEventListener('click', (e) => {
@@ -1289,6 +1443,7 @@ async function init() {
   await loadCategories()
   await loadAndRenderTodos()
   updateAuthBlock(user)
+  incrementOnboardingVisitCount()
   setupOnboardingListeners()
   showOnboardingIfNeeded(user)
 
